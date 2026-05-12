@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Paiement Commande | Pressing</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}" />
+    <script src="https://www.paypal.com/sdk/js?client-id=test&currency=EUR"></script>
+</head>
+<body>
+<main>
+    <section class="section">
+        <div class="container receipt-card">
+            <h2>Paiement de la Commande #<span th:text="${commande.id}"></span></h2>
+            <p><strong>Total à régler : </strong> <span id="montant" th:text="${commande.prixTotal}">0</span> XAF</p>
+            
+            <hr>
+            <div id="paypal-button-container" style="margin-top: 20px;"></div>
+        </div>
+    </section>
+</main>
+
+<script>
+    // Récupération du montant depuis le HTML
+    const montantXAF = document.getElementById('montant').innerText;
+    // PayPal utilise souvent l'EUR ou l'USD, conversion fictive pour le test
+    const montantEUR = (parseFloat(montantXAF) / 655).toFixed(2); 
+
+    paypal.Buttons({
+        createOrder: function(data, actions) {
+            return actions.order.create({
+                purchase_units: [{
+                    amount: {
+                        value: montantEUR
+                    }
+                }]
+            });
+        },
+        onApprove: function(data, actions) {
+            return actions.order.capture().then(function(details) {
+                alert('Paiement réussi par ' + details.payer.name.given_name + ' !');
+                // Redirection vers l'historique après succès
+                window.location.href = "/commandes/historique";
+            });
+        },
+        onError: function(err) {
+            console.error('Erreur PayPal :', err);
+            alert('Le paiement a échoué.');
+        }
+    }).render('#paypal-button-container');
+</script>
+</body>
+</html>

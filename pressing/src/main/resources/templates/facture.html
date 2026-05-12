@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Facture commande | Pressing</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}" />
+</head>
+<body>
+<header class="hero small-hero">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+        <h1>Facture de commande</h1>
+        <p>Reçu détaillé de votre commande, prêt à être consulté ou partagé.</p>
+        <a class="hero-button" th:href="@{/commandes/historique}">Retour à l'historique</a>
+    </div>
+</header>
+<main>
+    <section class="section section-receipt">
+        <div class="container receipt-card">
+            <h2>Facture n°<span th:text="${commandeDetail.id}">1</span></h2>
+            <div class="invoice-grid">
+                <p><strong>Client :</strong> <span th:text="${commandeDetail.client}">Jean</span></p>
+                <p><strong>Email :</strong> <span th:text="${commandeDetail.emailClient}">mail@example.com</span></p>
+                <p><strong>Type :</strong> <span th:text="${commandeDetail.typeCommande}">EXPRESS</span></p>
+                <p><strong>Nombre d'habits :</strong> <span th:text="${commandeDetail.nombreHabits}">3</span></p>
+                <p><strong>Prix total :</strong> <span th:text="${commandeDetail.prixTotal}">15000</span> XAF</p>
+                <p><strong>Statut :</strong> <span th:text="${commandeDetail.statut}">EN_ATTENTE</span></p>
+                <p><strong>Date création :</strong> <span th:text="${commandeDetail.dateCreation}">2026-05-11</span></p>
+                <p><strong>Date terminaison :</strong> <span th:text="${commandeDetail.dateTerminaison != null ? commandeDetail.dateTerminaison : 'Non terminée'}">-</span></p>
+            </div>
+            <div class="receipt-note">
+                <p>Ce document sert de facture numérique et de preuve de suivi pour votre commande.</p>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>

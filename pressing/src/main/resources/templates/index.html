@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Pressing Pro | Gestion</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}" />
+    <style>
+        /* CSS rapide pour l'intégration du formulaire */
+        .card-commande-form { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-top: 10px; }
+        .card-commande-form input, .card-commande-form select { width: 100%; margin-bottom: 8px; padding: 8px; border-radius: 4px; border: 1px solid #333; background: #1a1a2e; color: white; }
+        .btn-creer { width: 100%; background: #00b4d8; color: white; border: none; padding: 10px; cursor: pointer; font-weight: bold; border-radius: 4px; }
+        .btn-creer:hover { background: #0077b6; }
+        .grid-vetements { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 25px; padding: 20px 0; }
+    </style>
+</head>
+<body>
+
+<header class="hero" style="min-height: 40vh;">
+    <div class="hero-nav container">
+        <a class="logo" th:href="@{/}">PressingPro</a>
+        <nav class="main-nav">
+            <a th:href="@{/vetements/ajouter}">➕ Ajouter Vêtement</a>
+            <a th:href="@{/commandes/historique}">📋 Historique</a>
+            <a th:href="@{/login}">🔑 Connexion</a>
+        </nav>
+    </div>
+    <div class="hero-content">
+        <h1>Maître Pressing</h1>
+        <p>Créez vos commandes en un clic.</p>
+    </div>
+</header>
+
+<main class="container">
+    <section class="section">
+        <form method="get" class="filter-form" style="display: flex; gap: 10px; flex-wrap: wrap; background: #1a1a2e; padding: 20px; border-radius: 12px;">
+            <input type="text" name="couleur" placeholder="Couleur..." th:value="${filtreCouleur}" />
+            <input type="text" name="matiere" placeholder="Matière..." th:value="${filtreMatiere}" />
+            <select name="sortBy">
+                <option value="nom">Trier par Nom</option>
+                <option value="potentielColoration">Trier par Potentiel</option>
+            </select>
+            <button type="submit" style="background: #00b4d8; border: none; color: white; padding: 0 20px; border-radius: 5px;">Rechercher</button>
+        </form>
+    </section>
+
+    <section class="grid-vetements">
+        <div th:each="v : ${vetements}" class="vetement-card" style="background: #16213e; border-radius: 12px; overflow: hidden; border: 1px solid #333;">
+            <img th:src="@{/api/vetements/image/{id}(id=${v.id})}" style="width:100%; height:180px; object-fit:cover;" />
+            <div style="padding: 15px;">
+                <h3 th:text="${v.nom}" style="color: #00b4d8;">Nom</h3>
+                <p style="font-size: 0.9em; color: #ccc;">
+                    <span th:text="${v.couleur}">Couleur</span> | <span th:text="${v.matiere}">Matière</span>
+                </p>
+                
+                <form th:action="@{/commandes/creer}" method="post" class="card-commande-form">
+                    <input type="hidden" name="vetementId" th:value="${v.id}" />
+                    <input type="text" name="client" placeholder="Nom du client" required />
+                    <input type="email" name="emailClient" placeholder="Email client" required />
+                    <input type="number" name="nombreHabits" placeholder="Nombre d'habits" min="1" required />
+                    <select name="typeCommande">
+                        <option value="RAPIDE">Rapide (3j)</option>
+                        <option value="EXPRESS">Express (24h)</option>
+                        <option value="PROLONGEE">Prolongée (1sem)</option>
+                    </select>
+                    <button type="submit" class="btn-creer">Créer la commande</button>
+                </form>
+            </div>
+        </div>
+    </section>
+</main>
+</body>
+</html>
