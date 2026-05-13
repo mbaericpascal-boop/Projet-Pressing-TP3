@@ -22,9 +22,9 @@ public class SecurityConfig {
                 .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                 // Page login publique
                 .requestMatchers("/login").permitAll()
-                // Page d'accueil publique (voir les vêtements)
+                // Page d'accueil publique
                 .requestMatchers("/", "/commandes/accueil").permitAll()
-                // Tout le reste nécessite d'être connecté
+                // Tout le reste nécessite authentification
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
@@ -32,6 +32,7 @@ public class SecurityConfig {
                 .defaultSuccessUrl("/commandes/historique", true)
                 .permitAll()
             )
+            .httpBasic(basic -> {}) // ← AJOUT : permet Basic Auth pour Postman/API
             .logout(logout -> logout
                 .logoutSuccessUrl("/")
                 .permitAll()
