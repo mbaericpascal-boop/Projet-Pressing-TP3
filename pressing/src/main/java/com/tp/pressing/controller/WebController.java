@@ -5,13 +5,16 @@ import com.tp.pressing.entity.Vetement;
 import com.tp.pressing.service.*;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
-import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -31,11 +34,10 @@ public class WebController {
 
     @InitBinder("commande")
     public void initBinderCommande(WebDataBinder binder) {
-        // Sécurité pour empêcher la modification de champs sensibles via le formulaire
         binder.setDisallowedFields("id", "prixTotal", "statut", "dateCreation", "dateTerminaison");
     }
 
-    // ====================== ACCUEIL & RECHERCHE VÊTEMENTS ======================
+    // ====================== ACCUEIL & RECHERCHE ======================
     @GetMapping("/accueil")
     public String home(
             @RequestParam(required = false) String couleur,
@@ -49,19 +51,74 @@ public class WebController {
         model.addAttribute("vetements", vetementsPage.getContent());
         model.addAttribute("page", vetementsPage);
         model.addAttribute("pageNumbers", IntStream.range(0, vetementsPage.getTotalPages()).boxed().collect(Collectors.toList()));
-        model.addAttribute("filtreCouleur", couleur);
-        model.addAttribute("filtreMatiere", matiere);
-
+        model.addAttribute("commande", new Commande()); 
         return "index";
+    }
+
+    // ====================== GESTION DES VÊTEMENTS ======================
+    
+    @GetMapping("/vetements/ajouter")
+    public String formVetement() { 
+        return "ajouter-vetement"; 
+    }
+
+    @PostMapping("/vetements/ajouter")
+    public String ajouterVetement(
+            @RequestParam("nom") String nom,
+            @RequestParam("couleur") String couleur,
+            @RequestParam("matiere") String matiere,
+            @RequestParam(value = "potentielColoration", defaultValue = "5") int potentiel,
+            @RequestParam("file") MultipartFile file,
+            RedirectAttributes redirectAttributes) {
+        
+        try {
+            Vetement v = new Vetement();
+            v.setNom(nom);
+            v.setCouleur(couleur);
+            v.setMatiere(matiere);
+            v.setPotentielColoration(potentiel);
+            
+            // Correction pour l'erreur 500 : On définit un propriétaire par défaut
+            v.setNomProprietaire("Stock Magasin"); 
+            
+            v.calculerCategorie();
+
+            // 1. Sauvegarde en BDD pour générer l'ID
+            Vetement saved = vetementService.ajouterVetement(v);
+            
+            // 2. Sauvegarde de la photo si elle existe
+            if (file != null && !file.isEmpty()) {
+                vetementService.sauvegarderPhoto(saved.getId(), file);
+            }
+            
+            redirectAttributes.addFlashAttribute("messageSucces", "Article ajouté au catalogue !");
+            return "redirect:/commandes/accueil";
+            
+        } catch (Exception e) {
+            // Log de l'erreur dans le terminal VS Code
+            e.printStackTrace(); 
+            redirectAttributes.addFlashAttribute("error", "Erreur lors de l'enregistrement : " + e.getMessage());
+            return "redirect:/commandes/vetements/ajouter";
+        }
+    }
+
+    @GetMapping("/catalogue")
+    public String afficherCatalogue(Model model) {
+        List<Vetement> tousLesVetements = vetementService.getAllVetements();
+        Map<String, List<Vetement>> catalogueParClient = tousLesVetements.stream()
+                .collect(Collectors.groupingBy(v -> 
+                    (v.getNomProprietaire() != null && !v.getNomProprietaire().isBlank()) 
+                    ? v.getNomProprietaire() : "Stock Magasin"));
+                
+        model.addAttribute("catalogue", catalogueParClient);
+        return "catalogue";
     }
 
     // ====================== GESTION DES COMMANDES ======================
     
     @PostMapping("/creer")
     public String creerCommande(@Valid @ModelAttribute("commande") Commande commande, BindingResult result) {
-        if (result.hasErrors()) {
-            return "redirect:/commandes/accueil?error=validation";
-        }
+        if (result.hasErrors()) return "redirect:/commandes/accueil?error=validation";
         commandeService.ajouterCommande(commande);
         return "redirect:/commandes/historique?created=true";
     }
@@ -84,41 +141,12 @@ public class WebController {
         return "redirect:/commandes/historique";
     }
 
-    @GetMapping("/{id}/annuler")
-    public String annuler(@PathVariable Long id) {
-        commandeService.annulerCommande(id);
-        return "redirect:/commandes/historique";
-    }
-
     @GetMapping("/{id}/supprimer")
     public String supprimer(@PathVariable Long id) {
         commandeService.supprimerCommande(id);
         return "redirect:/commandes/historique";
     }
 
-    // ====================== GÉNÉRATION DE FACTURE PDF ======================
-    
-    @GetMapping("/{id}/facture")
-    @ResponseBody
-    public ResponseEntity<byte[]> voirFacture(@PathVariable Long id) {
-        try {
-            byte[] pdf = pdfService.genererFacture(id);
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_PDF);
-            // "inline" permet d'ouvrir le PDF dans le navigateur au lieu de le télécharger
-            headers.setContentDisposition(ContentDisposition.inline().filename("facture_" + id + ".pdf").build());
-            return new ResponseEntity<>(pdf, headers, HttpStatus.OK);
-        } catch (Exception e) {
-            System.err.println("❌ Erreur PDF : " + e.getMessage());
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    // ====================== NAVIGATION AUTRES ======================
-    
     @GetMapping("/login")
     public String login() { return "login"; }
-
-    @GetMapping("/vetements/ajouter")
-    public String formVetement() { return "ajouter-vetement"; }
 }

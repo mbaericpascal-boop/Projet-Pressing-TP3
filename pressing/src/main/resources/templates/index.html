@@ -6,7 +6,6 @@
     <title>Pressing Pro | Gestion</title>
     <link rel="stylesheet" th:href="@{/css/app.css}" />
     <style>
-        /* CSS rapide pour l'intégration du formulaire */
         .card-commande-form { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-top: 10px; }
         .card-commande-form input, .card-commande-form select { width: 100%; margin-bottom: 8px; padding: 8px; border-radius: 4px; border: 1px solid #333; background: #1a1a2e; color: white; }
         .btn-creer { width: 100%; background: #00b4d8; color: white; border: none; padding: 10px; cursor: pointer; font-weight: bold; border-radius: 4px; }
@@ -18,9 +17,10 @@
 
 <header class="hero" style="min-height: 40vh;">
     <div class="hero-nav container">
-        <a class="logo" th:href="@{/}">PressingPro</a>
+        <a class="logo" th:href="@{/commandes/accueil}">PressingPro</a>
         <nav class="main-nav">
-            <a th:href="@{/vetements/ajouter}">➕ Ajouter Vêtement</a>
+            <a th:href="@{/commandes/vetements/ajouter}">➕ Ajouter Vêtement</a>
+            <a th:href="@{/commandes/catalogue}">📁 Catalogue</a>
             <a th:href="@{/commandes/historique}">📋 Historique</a>
             <a th:href="@{/login}">🔑 Connexion</a>
         </nav>
@@ -33,14 +33,14 @@
 
 <main class="container">
     <section class="section">
-        <form method="get" class="filter-form" style="display: flex; gap: 10px; flex-wrap: wrap; background: #1a1a2e; padding: 20px; border-radius: 12px;">
-            <input type="text" name="couleur" placeholder="Couleur..." th:value="${filtreCouleur}" />
+        <form method="get" th:action="@{/commandes/accueil}" class="filter-form" style="display: flex; gap: 10px; flex-wrap: wrap; background: #1a1a2e; padding: 20px; border-radius: 12px;">
+            <input type="text" name="couleur" placeholder="Chercher client ou couleur..." th:value="${filtreCouleur}" />
             <input type="text" name="matiere" placeholder="Matière..." th:value="${filtreMatiere}" />
             <select name="sortBy">
                 <option value="nom">Trier par Nom</option>
                 <option value="potentielColoration">Trier par Potentiel</option>
             </select>
-            <button type="submit" style="background: #00b4d8; border: none; color: white; padding: 0 20px; border-radius: 5px;">Rechercher</button>
+            <button type="submit" style="background: #00b4d8; border: none; color: white; padding: 0 20px; border-radius: 5px; cursor:pointer;">Rechercher</button>
         </form>
     </section>
 

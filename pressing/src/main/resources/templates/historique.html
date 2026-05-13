@@ -6,24 +6,21 @@
     <title>Historique des commandes | Pressing Pro</title>
     <link rel="stylesheet" th:href="@{/css/app.css}" />
     <style>
-        .btn-valider  { background:#2196F3; color:#fff; border:none; padding:8px 15px; border-radius:6px; cursor:pointer; margin:2px; font-weight: 500; transition: 0.3s; }
-        .btn-terminer { background:#4CAF50; color:#fff; border:none; padding:8px 15px; border-radius:6px; cursor:pointer; margin:2px; font-weight: 500; transition: 0.3s; }
-        .btn-annuler  { background:#f44336; color:#fff; border:none; padding:8px 15px; border-radius:6px; cursor:pointer; margin:2px; font-weight: 500; transition: 0.3s; }
-        .btn-facture  { background:#FF9800; color:#fff; border:none; padding:8px 15px; border-radius:6px; cursor:pointer; margin:2px; text-decoration:none; display:inline-block; font-weight: 500; transition: 0.3s; }
-        .btn-valider:hover, .btn-terminer:hover, .btn-annuler:hover, .btn-facture:hover { opacity: 0.8; transform: translateY(-1px); }
+        .btn-valider  { background:#2196F3; color:#fff; border:none; padding:8px 15px; border-radius:6px; cursor:pointer; text-decoration:none; display:inline-block;}
+        .btn-terminer { background:#4CAF50; color:#fff; border:none; padding:8px 15px; border-radius:6px; cursor:pointer; text-decoration:none; display:inline-block;}
+        .btn-annuler  { background:#f44336; color:#fff; border:none; padding:8px 15px; border-radius:6px; cursor:pointer; text-decoration:none; display:inline-block;}
+        .btn-facture  { background:#FF9800; color:#fff; border:none; padding:8px 15px; border-radius:6px; text-decoration:none; display:inline-block; }
         .statut-EN_ATTENTE { background: #fff3e0; color:#e65100; padding: 4px 8px; border-radius: 4px; font-weight:bold; }
         .statut-EN_COURS   { background: #e3f2fd; color:#0d47a1; padding: 4px 8px; border-radius: 4px; font-weight:bold; }
         .statut-TERMINEE   { background: #e8f5e9; color:#1b5e20; padding: 4px 8px; border-radius: 4px; font-weight:bold; }
-        .statut-ANNULEE    { background: #ffebee; color:#b71c1c; padding: 4px 8px; border-radius: 4px; font-weight:bold; }
         .table-wrapper { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body>
 <header class="hero small-hero">
-    <div class="hero-overlay"></div>
     <div class="hero-content">
         <h1>Historique des commandes</h1>
-        <p>Gestion complète du cycle de vie des traitements clients.</p>
+        <p>Gestion du cycle de vie des traitements clients.</p>
         <a class="hero-button" th:href="@{/commandes/accueil}">Retour à l'accueil</a>
     </div>
 </header>
@@ -31,7 +28,7 @@
     <section class="section">
         <div class="container">
             <div class="table-wrapper">
-                <table class="history-table" style="width:100%; border-collapse: collapse;">
+                <table style="width:100%; border-collapse: collapse;">
                     <thead>
                         <tr style="border-bottom: 2px solid #eee; text-align: left;">
                             <th>ID</th>
@@ -39,8 +36,7 @@
                             <th>Détails</th>
                             <th>Statut</th>
                             <th>Prix (XAF)</th>
-                            <th>Dates</th>
-                            <th>Actions de gestion</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -48,33 +44,26 @@
                             <td th:text="'#' + ${commande.id}"></td>
                             <td>
                                 <strong th:text="${commande.client}"></strong><br/>
-                                <small th:text="${commande.emailClient}" style="color:#666;"></small>
+                                <small th:text="${commande.emailClient}"></small>
                             </td>
                             <td>
                                 <span th:text="${commande.nombreHabits} + ' habits'"></span><br/>
-                                <small th:text="'Type: ' + ${commande.typeCommande}" style="color:#888;"></small>
+                                <small th:text="${commande.typeCommande}"></small>
                             </td>
                             <td>
                                 <span th:classappend="'statut-' + ${commande.statut}" th:text="${commande.statut}"></span>
                             </td>
-                            <td th:text="${commande.prixTotal} + ' XAF'" style="font-weight: bold;"></td>
-                            <td>
-                                <small>Créé: <span th:text="${#temporals.format(commande.dateCreation, 'dd/MM/yy HH:mm')}"></span></small><br/>
-                                <small th:if="${commande.dateTerminaison != null}">Fini: <span th:text="${#temporals.format(commande.dateTerminaison, 'dd/MM/yy HH:mm')}"></span></small>
-                            </td>
+                            <td th:text="${commande.prixTotal} + ' XAF'"></td>
                             <td>
                                 <a th:if="${commande.statut == 'EN_ATTENTE'}" th:href="@{'/commandes/' + ${commande.id} + '/valider'}" class="btn-valider">Valider</a>
                                 <a th:if="${commande.statut == 'EN_COURS'}" th:href="@{'/commandes/' + ${commande.id} + '/terminer'}" class="btn-terminer">Terminer</a>
-                                <a th:if="${commande.statut == 'EN_ATTENTE' || commande.statut == 'EN_COURS'}" th:href="@{'/commandes/' + ${commande.id} + '/annuler'}" class="btn-annuler">Annuler</a>
-                                <a th:href="@{'/commandes/' + ${commande.id} + '/facture'}" target="_blank" class="btn-facture">Facture PDF</a>
-                                <a th:href="@{'/commandes/' + ${commande.id} + '/supprimer'}" style="color: #ccc; font-size: 12px; margin-left: 5px;" onclick="return confirm('Supprimer définitivement ?')">Suppr.</a>
+                                <a th:href="@{'/commandes/' + ${commande.id} + '/facture'}" target="_blank" class="btn-facture">PDF</a>
+                                <a th:href="@{'/commandes/' + ${commande.id} + '/supprimer'}" style="color:red; font-size: 11px; margin-left: 10px;" onclick="return confirm('Supprimer ?')">X</a>
                             </td>
-                        </tr>
-                        <tr th:if="${#lists.isEmpty(commandes)}">
-                            <td colspan="7" style="text-align:center; padding: 40px; color: #999;">Aucune commande en base.</td>
                         </tr>
                     </tbody>
                 </table>
+                <div th:if="${#lists.isEmpty(commandes)}" style="text-align:center; padding: 20px;">Aucune commande.</div>
             </div>
         </div>
     </section>

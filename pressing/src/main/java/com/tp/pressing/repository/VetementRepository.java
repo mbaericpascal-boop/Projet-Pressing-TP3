@@ -14,5 +14,6 @@ public interface VetementRepository extends JpaRepository<Vetement, Long> {
     Page<Vetement> findByPotentielColorationBetween(int min, int max, Pageable pageable);
     Page<Vetement> findAll(Pageable pageable);
     Page<Vetement> findByNomContainingIgnoreCase(String nom, Pageable pageable);
-    Page<Vetement> findByPhotoContainingIgnoreCase(String photo, Pageable pageable);
+    Page<Vetement> findByNomProprietaireContainingIgnoreCase(String nomProprietaire, Pageable pageable);
+    Page<Vetement> findByImageNameContainingIgnoreCase(String imageName, Pageable pageable);
 }

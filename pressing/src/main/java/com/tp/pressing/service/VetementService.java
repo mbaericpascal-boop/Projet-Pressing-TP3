@@ -26,12 +26,8 @@ public class VetementService {
         this.vetementRepository = vetementRepository;
     }
 
-    /**
-     * Ajoute un vêtement et calcule sa catégorie automatique 
-     * avant la sauvegarde.
-     */
     public Vetement ajouterVetement(Vetement vetement) {
-        vetement.calculerCategorie(); // Détermine EXCELLENT_NATURELLE, etc.
+        vetement.calculerCategorie(); 
         return vetementRepository.save(vetement);
     }
 
@@ -42,8 +38,6 @@ public class VetementService {
     public Page<Vetement> getVetementsPagines(int page, int size) {
         return vetementRepository.findAll(PageRequest.of(page, size));
     }
-
-    // --- Méthodes de Recherche Spécifiques ---
 
     public Page<Vetement> rechercherParCouleur(String couleur, int page, int size) {
         return vetementRepository.findByCouleurContainingIgnoreCase(couleur, PageRequest.of(page, size));
@@ -67,7 +61,7 @@ public class VetementService {
     }
 
     /**
-     * Système de filtrage dynamique utilisé par le WebController.
+     * Système de filtrage dynamique (7 paramètres pour compatibilité contrôleurs).
      */
     public Page<Vetement> filtrerEtTrierVetements(String couleur, String matiere, String categorie,
                                                   String sortBy, String direction,
@@ -75,37 +69,38 @@ public class VetementService {
         Sort sort = Sort.by(Sort.Direction.fromString(direction), sortBy);
         Pageable pageable = PageRequest.of(page, size, sort);
 
+        // Si le champ couleur est utilisé pour chercher un nom de client
+        if (couleur != null && !couleur.isBlank()) {
+            Page<Vetement> parProprietaire = vetementRepository.findByNomProprietaireContainingIgnoreCase(couleur, pageable);
+            if (parProprietaire.hasContent()) {
+                return parProprietaire;
+            }
+            return vetementRepository.findByCouleurContainingIgnoreCase(couleur, pageable);
+        }
+
         if (categorie != null && !categorie.isBlank()) {
             return vetementRepository.findByCategorieContainingIgnoreCase(categorie, pageable);
         }
-        if (couleur != null && !couleur.isBlank()) {
-            return vetementRepository.findByCouleurContainingIgnoreCase(couleur, pageable);
-        }
+        
         if (matiere != null && !matiere.isBlank()) {
             return vetementRepository.findByMatiereContainingIgnoreCase(matiere, pageable);
         }
+
         return vetementRepository.findAll(pageable);
     }
 
-    /**
-     * Gère l'upload physique des images et met à jour le chemin dans la BDD.
-     */
     public Vetement sauvegarderPhoto(Long id, MultipartFile file) throws IOException {
         Vetement v = getVetementById(id);
-        
         Path dossier = Paths.get(uploadDir);
         if (!Files.exists(dossier)) {
             Files.createDirectories(dossier);
         }
-
         String original = file.getOriginalFilename();
         String safeName = (original != null) ? original.replaceAll("[^a-zA-Z0-9\\.\\-_]", "_") : "image_" + id;
         String nomFichier = id + "_" + safeName;
-        
         Path chemin = dossier.resolve(nomFichier);
         Files.copy(file.getInputStream(), chemin, StandardCopyOption.REPLACE_EXISTING);
-        
-        v.setPhoto(nomFichier);
+        v.setImageName(nomFichier);
         return vetementRepository.save(v);
     }
 }
