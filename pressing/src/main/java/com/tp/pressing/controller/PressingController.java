@@ -52,7 +52,7 @@ public class PressingController {
 
     @GetMapping("/commandes")
     public List<Commande> listerCommandes() {
-        return commandeService.getAllCommandes();
+        return (List<Commande>) commandeService.getAllCommandes();
     }
 
     @GetMapping("/commandes/page")
