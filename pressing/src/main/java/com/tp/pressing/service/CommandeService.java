@@ -1,12 +1,13 @@
 package com.tp.pressing.service;
 
+import java.time.LocalDateTime;
+
+import org.jspecify.annotations.Nullable;
+import org.springframework.data.domain.Page;
+import org.springframework.stereotype.Service;
+
 import com.tp.pressing.entity.Commande;
 import com.tp.pressing.repository.CommandeRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.stereotype.Service;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class CommandeService {
@@ -46,80 +47,109 @@ public class CommandeService {
         }
         return sauvegardee;
     }
+     /**
+ * Valide la commande : EN_ATTENTE → EN_COURS uniquement.
+ */
+public Commande validerCommande(Long id) {
+    Commande c = getCommandeById(id);
 
-    /**
-     * Valide la commande : passe de EN_ATTENTE à EN_COURS.
-     */
-    public Commande validerCommande(Long id) {
-        Commande c = getCommandeById(id);
-        c.setStatut("EN_COURS");
-        return commandeRepository.save(c);
+    if (!c.getStatut().equals("EN_ATTENTE")) {
+        throw new RuntimeException(
+            "Impossible de valider la commande #" + id +
+            " — statut actuel : " + c.getStatut() +
+            " (attendu : EN_ATTENTE)"
+        );
     }
 
-    /**
-     * Termine la commande : passe à TERMINEE, enregistre la date de fin,
-     * et envoie l'email de prêt ainsi que le REÇU PDF.
-     */
-    public Commande terminerCommande(Long id) {
-        Commande c = getCommandeById(id);
-        c.setStatut("TERMINEE");
-        c.setDateTerminaison(LocalDateTime.now());
-        
-        Commande sauvegardee = commandeRepository.save(c);
+    c.setStatut("EN_COURS");
+    return commandeRepository.save(c);
+}
 
-        if (sauvegardee.getEmailClient() != null && !sauvegardee.getEmailClient().isEmpty()) {
-            try {
-                // 1. Notification simple de disponibilité
-                emailService.envoyerNotificationPret(
-                    sauvegardee.getEmailClient(), 
-                    sauvegardee.getClient(), 
-                    sauvegardee.getTypeCommande()
-                );
-                
-                // 2. Envoi du Reçu Final avec le PDF généré
-                emailService.envoyerRecuCommande(
-                    sauvegardee.getEmailClient(),
-                    sauvegardee.getClient(),
-                    sauvegardee.getId(),
-                    sauvegardee.getTypeCommande(),
-                    sauvegardee.getNombreHabits(),
-                    sauvegardee.getPrixTotal(),
-                    sauvegardee.getDateCreation(),
-                    sauvegardee.getDateTerminaison()
-                );
-            } catch (Exception e) {
-                System.err.println("⚠️ Erreur lors de l'envoi du reçu final : " + e.getMessage());
-            }
+/**
+ * Termine la commande : EN_COURS → TERMINEE uniquement.
+ */
+public Commande terminerCommande(Long id) {
+    Commande c = getCommandeById(id);
+
+    if (!c.getStatut().equals("EN_COURS")) {
+        throw new RuntimeException(
+            "Impossible de terminer la commande #" + id +
+            " — statut actuel : " + c.getStatut() +
+            " (attendu : EN_COURS)"
+        );
+    }
+
+    c.setStatut("TERMINEE");
+    c.setDateTerminaison(LocalDateTime.now());
+
+    Commande sauvegardee = commandeRepository.save(c);
+
+    if (sauvegardee.getEmailClient() != null && !sauvegardee.getEmailClient().isEmpty()) {
+        try {
+            emailService.envoyerNotificationPret(
+                sauvegardee.getEmailClient(),
+                sauvegardee.getClient(),
+                sauvegardee.getTypeCommande()
+            );
+            emailService.envoyerRecuCommande(
+                sauvegardee.getEmailClient(),
+                sauvegardee.getClient(),
+                sauvegardee.getId(),
+                sauvegardee.getTypeCommande(),
+                sauvegardee.getNombreHabits(),
+                sauvegardee.getPrixTotal(),
+                sauvegardee.getDateCreation(),
+                sauvegardee.getDateTerminaison()
+            );
+        } catch (Exception e) {
+            System.err.println("⚠️ Erreur envoi reçu final : " + e.getMessage());
         }
-        return sauvegardee;
+    }
+    return sauvegardee;
+}
+
+/**
+ * Annule la commande : impossible si déjà TERMINEE.
+ */
+public Commande annulerCommande(Long id) {
+    Commande c = getCommandeById(id);
+
+    if (c.getStatut().equals("TERMINEE")) {
+        throw new RuntimeException(
+            "Impossible d'annuler la commande #" + id +
+            " — elle est déjà terminée."
+        );
     }
 
-    /**
-     * Annule la commande.
-     */
-    public Commande annulerCommande(Long id) {
-        Commande c = getCommandeById(id);
-        c.setStatut("ANNULEE");
-        c.setDateTerminaison(LocalDateTime.now());
-        return commandeRepository.save(c);
+    if (c.getStatut().equals("ANNULEE")) {
+        throw new RuntimeException(
+            "La commande #" + id + " est déjà annulée."
+        );
     }
 
-    // --- Méthodes de lecture et gestion ---
-
-    public List<Commande> getAllCommandes() {
-        return commandeRepository.findAll();
-    }
-
-    public Page<Commande> getCommandesPaginees(int page, int size) {
-        return commandeRepository.findAll(PageRequest.of(page, size));
-    }
+    c.setStatut("ANNULEE");
+    c.setDateTerminaison(LocalDateTime.now());
+    return commandeRepository.save(c);
+}
 
     public Commande getCommandeById(Long id) {
-        return commandeRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Commande introuvable avec l'ID : " + id));
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     public void supprimerCommande(Long id) {
-        commandeRepository.deleteById(id);
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'supprimerCommande'");
+    }
+
+    public @Nullable Object getAllCommandes() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getAllCommandes'");
+    }
+
+    public Page<Commande> getCommandesPaginees(int page, int size) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getCommandesPaginees'");
     }
 }
+
+   
