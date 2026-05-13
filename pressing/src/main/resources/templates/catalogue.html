@@ -2,12 +2,12 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Catalogue Clients | Pressing</title>
+    <title th:text="#{app.voir.vetements}">Catalogue Clients | Pressing</title>
     <link rel="stylesheet" th:href="@{/css/app.css}">
     <style>
         .search-container { margin: 20px 0; text-align: center; }
         .search-input { padding: 12px; width: 60%; border-radius: 25px; border: 1px solid #ddd; font-size: 16px; }
-        .client-section { background: #f9f9f9; padding: 20px; border-radius: 15px; margin-bottom: 30px; }
+        .client-section { background: #f9f9f9; padding: 20px; border-radius: 15px; margin-bottom: 30px; color: #333; }
         .vetements-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
         .vetement-card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .vetement-card img { width: 100%; height: 150px; object-fit: cover; border-radius: 5px; }
@@ -17,31 +17,33 @@
 <body>
     <header class="hero small-hero">
         <div class="hero-content">
-            <h1>Catalogue des Vêtements</h1>
-            <p>Visualisez les dépôts classés par propriétaire.</p>
-            <a th:href="@{/commandes/accueil}" class="hero-button">Retour Accueil</a>
+            <h1 th:text="#{app.recherche.titre}">Catalogue des Vêtements</h1>
+            <p th:text="#{app.vetements.desc}">Visualisez les dépôts classés par propriétaire.</p>
+            <a th:href="@{/commandes/accueil}" class="hero-button" th:text="#{app.langue.fr == 'Français' ? 'Retour Accueil' : 'Back Home'}">Retour Accueil</a>
         </div>
     </header>
 
     <main class="container">
         <div class="search-container">
-            <input type="text" id="searchInput" class="search-input" onkeyup="filtrerTout()" placeholder="Chercher un client, une couleur...">
+            <input type="text" id="searchInput" class="search-input" onkeyup="filtrerTout()" th:placeholder="#{app.nom.placeholder}">
         </div>
 
         <div th:each="entry : ${catalogue}" class="client-section">
             <h2 class="client-header" style="border-left: 5px solid #3498db; padding-left: 15px; margin-bottom: 20px;">
-                Dépôts de : <span class="client-name" th:text="${entry.key}">Nom Client</span>
+                <span th:text="#{app.nom.client}">Dépôts de</span> : <span class="client-name" th:text="${entry.key}">Nom Client</span>
             </h2>
             
             <div class="vetements-grid">
                 <div th:each="v : ${entry.value}" class="vetement-card">
-                    <img th:src="@{/api/vetements/image/{id}(id=${v.id})}" th:alt="${v.nom}">
+                    <!-- CORRECTION IMAGE ICI -->
+                    <img th:src="@{'/images/' + ${v.id} + '.png'}" th:alt="#{app.aucune.photo}">
+                    
                     <h4 th:text="${v.nom}" style="margin: 10px 0;">Nom</h4>
                     <p style="font-size: 14px; color: #666;">
-                        Matière: <strong th:text="${v.matiere}"></strong><br>
-                        Couleur: <strong th:text="${v.couleur}"></strong>
+                        <span th:text="#{app.matiere}">Matière</span>: <strong th:text="${v.matiere}"></strong><br>
+                        <span th:text="#{app.couleur}">Couleur</span>: <strong th:text="${v.couleur}"></strong>
                     </p>
-                    <span class="badge" th:text="${v.potentielColoration} + '/10 fragile'"></span>
+                    <span class="badge" th:text="${v.potentielColoration} + ' ' + #{app.sort.potentiel}"></span>
                 </div>
             </div>
         </div>

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Pressing Pro | Gestion</title>
+    <title th:text="#{app.titre}">Pressing Pro | Gestion</title>
     <link rel="stylesheet" th:href="@{/css/app.css}" />
     <style>
         .card-commande-form { background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-top: 10px; }
@@ -17,36 +17,39 @@
 
 <header class="hero" style="min-height: 40vh;">
     <div class="hero-nav container">
-        <a class="logo" th:href="@{/commandes/accueil}">PressingPro</a>
+        <a class="logo" th:href="@{/commandes/accueil}" th:text="#{app.titre}">PressingPro</a>
         <nav class="main-nav">
-            <a th:href="@{/commandes/vetements/ajouter}">➕ Ajouter Vêtement</a>
-            <a th:href="@{/commandes/catalogue}">📁 Catalogue</a>
-            <a th:href="@{/commandes/historique}">📋 Historique</a>
-            <a th:href="@{/login}">🔑 Connexion</a>
+            <a th:href="@{/commandes/vetements/ajouter}" th:text="'➕ ' + #{app.ajouter.vetement}">➕ Ajouter Vêtement</a>
+            <a th:href="@{/commandes/catalogue}" th:text="'📁 ' + #{app.voir.vetements}">📁 Catalogue</a>
+            <a th:href="@{/commandes/historique}" th:text="'📋 ' + #{app.historique}">📋 Historique</a>
+            <a th:href="@{/login}" th:text="'🔑 ' + #{app.connexion}">🔑 Connexion</a>
         </nav>
     </div>
     <div class="hero-content">
-        <h1>Maître Pressing</h1>
-        <p>Créez vos commandes en un clic.</p>
+        <h1 th:text="#{app.titre}">Maître Pressing</h1>
+        <p th:text="#{app.soustitre}">Gestion sécurisée et interface animée.</p>
     </div>
 </header>
 
 <main class="container">
     <section class="section">
         <form method="get" th:action="@{/commandes/accueil}" class="filter-form" style="display: flex; gap: 10px; flex-wrap: wrap; background: #1a1a2e; padding: 20px; border-radius: 12px;">
-            <input type="text" name="couleur" placeholder="Chercher client ou couleur..." th:value="${filtreCouleur}" />
-            <input type="text" name="matiere" placeholder="Matière..." th:value="${filtreMatiere}" />
+            <input type="text" name="couleur" th:placeholder="#{app.couleur}" th:value="${filtreCouleur}" />
+            <input type="text" name="matiere" th:placeholder="#{app.matiere}" th:value="${filtreMatiere}" />
             <select name="sortBy">
-                <option value="nom">Trier par Nom</option>
-                <option value="potentielColoration">Trier par Potentiel</option>
+                <option value="nom" th:text="#{app.sort.nom}">Nom</option>
+                <option value="potentielColoration" th:text="#{app.sort.potentiel}">Potentiel</option>
             </select>
-            <button type="submit" style="background: #00b4d8; border: none; color: white; padding: 0 20px; border-radius: 5px; cursor:pointer;">Rechercher</button>
+            <button type="submit" style="background: #00b4d8; border: none; color: white; padding: 0 20px; border-radius: 5px; cursor:pointer;" th:text="#{app.filtrer}">Rechercher</button>
         </form>
     </section>
 
     <section class="grid-vetements">
         <div th:each="v : ${vetements}" class="vetement-card" style="background: #16213e; border-radius: 12px; overflow: hidden; border: 1px solid #333;">
-            <img th:src="@{/api/vetements/image/{id}(id=${v.id})}" style="width:100%; height:180px; object-fit:cover;" />
+            <img th:src="@{'/images/' + ${v.id} + '.png'}" 
+                 style="width:100%; height:180px; object-fit:cover;" 
+                 th:alt="#{app.aucune.photo}" />
+            
             <div style="padding: 15px;">
                 <h3 th:text="${v.nom}" style="color: #00b4d8;">Nom</h3>
                 <p style="font-size: 0.9em; color: #ccc;">
@@ -55,15 +58,14 @@
                 
                 <form th:action="@{/commandes/creer}" method="post" class="card-commande-form">
                     <input type="hidden" name="vetementId" th:value="${v.id}" />
-                    <input type="text" name="client" placeholder="Nom du client" required />
-                    <input type="email" name="emailClient" placeholder="Email client" required />
-                    <input type="number" name="nombreHabits" placeholder="Nombre d'habits" min="1" required />
+                    <input type="text" name="client" th:placeholder="#{app.nom.placeholder}" required />
+                    <input type="email" name="emailClient" th:placeholder="#{app.email.placeholder}" required />
+                    <input type="number" name="nombreHabits" th:placeholder="#{app.nb.habits}" min="1" required />
                     <select name="typeCommande">
-                        <option value="RAPIDE">Rapide (3j)</option>
-                        <option value="EXPRESS">Express (24h)</option>
-                        <option value="PROLONGEE">Prolongée (1sem)</option>
+                        <option value="RAPIDE" th:text="#{app.type.commande} + ' (3j)'">Rapide</option>
+                        <option value="EXPRESS" th:text="#{app.type.commande} + ' (24h)'">Express</option>
                     </select>
-                    <button type="submit" class="btn-creer">Créer la commande</button>
+                    <button type="submit" class="btn-creer" th:text="#{label.button}">Créer la commande</button>
                 </form>
             </div>
         </div>

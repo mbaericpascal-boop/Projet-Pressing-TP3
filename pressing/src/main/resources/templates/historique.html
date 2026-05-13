@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Historique des commandes | Pressing Pro</title>
+    <title th:text="#{app.historique} + ' | Pressing Pro'">Historique des commandes | Pressing Pro</title>
     <link rel="stylesheet" th:href="@{/css/app.css}" />
     <style>
         .btn-valider  { background:#2196F3; color:#fff; border:none; padding:8px 15px; border-radius:6px; cursor:pointer; text-decoration:none; display:inline-block;}
@@ -19,9 +19,9 @@
 <body>
 <header class="hero small-hero">
     <div class="hero-content">
-        <h1>Historique des commandes</h1>
-        <p>Gestion du cycle de vie des traitements clients.</p>
-        <a class="hero-button" th:href="@{/commandes/accueil}">Retour à l'accueil</a>
+        <h1 th:text="#{app.historique}">Historique des commandes</h1>
+        <p th:text="#{app.commande.desc}">Gestion du cycle de vie des traitements clients.</p>
+        <a class="hero-button" th:href="@{/commandes/accueil}" th:text="#{app.langue.fr == 'Français' ? 'Retour à l\'accueil' : 'Back to home'}">Retour à l'accueil</a>
     </div>
 </header>
 <main>
@@ -32,10 +32,10 @@
                     <thead>
                         <tr style="border-bottom: 2px solid #eee; text-align: left;">
                             <th>ID</th>
-                            <th>Client</th>
-                            <th>Détails</th>
+                            <th th:text="#{app.nom.client}">Client</th>
+                            <th th:text="#{app.recherche.titre}">Détails</th>
                             <th>Statut</th>
-                            <th>Prix (XAF)</th>
+                            <th th:text="#{app.sort.desc == 'Descendant' ? 'Prix (XAF)' : 'Price (XAF)'}">Prix (XAF)</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -47,7 +47,7 @@
                                 <small th:text="${commande.emailClient}"></small>
                             </td>
                             <td>
-                                <span th:text="${commande.nombreHabits} + ' habits'"></span><br/>
+                                <span th:text="${commande.nombreHabits} + ' ' + #{app.nb.habits}"></span><br/>
                                 <small th:text="${commande.typeCommande}"></small>
                             </td>
                             <td>
@@ -55,15 +55,15 @@
                             </td>
                             <td th:text="${commande.prixTotal} + ' XAF'"></td>
                             <td>
-                                <a th:if="${commande.statut == 'EN_ATTENTE'}" th:href="@{'/commandes/' + ${commande.id} + '/valider'}" class="btn-valider">Valider</a>
-                                <a th:if="${commande.statut == 'EN_COURS'}" th:href="@{'/commandes/' + ${commande.id} + '/terminer'}" class="btn-terminer">Terminer</a>
+                                <a th:if="${commande.statut == 'EN_ATTENTE'}" th:href="@{'/commandes/' + ${commande.id} + '/valider'}" class="btn-valider" th:text="#{app.sort.asc == 'Ascendant' ? 'Valider' : 'Validate'}">Valider</a>
+                                <a th:if="${commande.statut == 'EN_COURS'}" th:href="@{'/commandes/' + ${commande.id} + '/terminer'}" class="btn-terminer" th:text="#{app.sort.asc == 'Ascendant' ? 'Terminer' : 'Finish'}">Terminer</a>
                                 <a th:href="@{'/commandes/' + ${commande.id} + '/facture'}" target="_blank" class="btn-facture">PDF</a>
                                 <a th:href="@{'/commandes/' + ${commande.id} + '/supprimer'}" style="color:red; font-size: 11px; margin-left: 10px;" onclick="return confirm('Supprimer ?')">X</a>
                             </td>
                         </tr>
                     </tbody>
                 </table>
-                <div th:if="${#lists.isEmpty(commandes)}" style="text-align:center; padding: 20px;">Aucune commande.</div>
+                <div th:if="${#lists.isEmpty(commandes)}" style="text-align:center; padding: 20px;" th:text="#{app.aucun.resultat}">Aucune commande.</div>
             </div>
         </div>
     </section>
