@@ -18,11 +18,18 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll()
+                // Ressources publiques
+                .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
+                // Page login publique
+                .requestMatchers("/login").permitAll()
+                // Page d'accueil publique (voir les vêtements)
+                .requestMatchers("/", "/commandes/accueil").permitAll()
+                // Tout le reste nécessite d'être connecté
+                .anyRequest().authenticated()
             )
             .formLogin(form -> form
                 .loginPage("/login")
-                .defaultSuccessUrl("/", true)
+                .defaultSuccessUrl("/commandes/historique", true)
                 .permitAll()
             )
             .logout(logout -> logout
